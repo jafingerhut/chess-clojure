@@ -33,14 +33,26 @@
     (unchecked-int hash)))
 
 
+(defn sequence-hash-combine [s multiplier element-hash-fn]
+  (let [multiplier (int multiplier)]
+    (loop [s s
+           h (int 1)]
+      (if (seq s)
+        (recur (rest s)
+               (unchecked-int (p/+ (p/* h multiplier)
+                                   (int (element-hash-fn (first s))))))
+        h))))
+
+
 (defn clj-sequence-hash-combine [s element-hash-fn]
-  (loop [s s
-         h (int 1)]
-    (if (seq s)
-      (recur (rest s)
-             (unchecked-int (p/+ (p/* h (int 31))
-                                 (int (element-hash-fn (first s))))))
-      h)))
+  (sequence-hash-combine s 31 element-hash-fn))
+
+
+(defn engelberg-sequence-hash-combine
+  "Recommended hash for vectors and sequences from Mark Engelberg's
+hashing executive summary document as of Oct 29 2013."
+  [s element-hash-fn]
+  (sequence-hash-combine s 524287 element-hash-fn))
 
 
 (defn alt-integer-hash [i]
@@ -50,6 +62,32 @@
                                                (p/bit-and i (long 0xffffffff))]
                                               0)
         :else (hash i)))
+
+
+(defn engelberg-long-hash-munge
+  "Recommended hash for longs from Mark Engelberg's hashing executive
+summary document as of Oct 29 2013."
+  [i]
+  (if (<= Long/MIN_VALUE i Long/MAX_VALUE)
+    (let [a (unchecked-long i)
+          a (p/bit-xor a (p/<<  a 21))
+          a (p/bit-xor a (p/>>> a 35))
+          a (p/bit-xor a (p/<<  a  4))
+          a (p/bit-xor a (p/>>> a 32))]
+      (unchecked-int a))
+    (hash i)))
+
+
+(defn engelberg-xor-shift-32
+  "Recommended modification to hash values of set elements before they
+are added together, from Mark Engelberg's hashing executive summary
+document as of Oct 29 2013."
+  [i]
+  (let [a (unchecked-int i)
+        a (unchecked-int (p/bit-xor a (p/<<  a  3)))
+        a (unchecked-int (p/bit-xor a (p/>>> a  1)))
+        a (unchecked-int (p/bit-xor a (p/<<  a 14)))]
+    (unchecked-int a)))
 
 
 (defn alt-hash-0
@@ -87,6 +125,20 @@ murmur3-32 on the sequence of hash values of its elements."
         :else (throw (IllegalArgumentException. (format "alt-hash-1 called with object of class %s" (class obj))))))
 
 
+(defn engelberg-hash
+  "Combines all recommendations from Mark Engelberg's Oct 29 2013
+executive summary document, except for those on maps."
+  [obj]
+  (cond (integer? obj) (engelberg-long-hash-munge obj)
+        (keyword? obj) (hash obj)
+        (set? obj) (unchecked-int (reduce + (map (fn [x]
+                                                   (engelberg-xor-shift-32
+                                                    (engelberg-hash x)))
+                                                 obj)))
+        (vector? obj) (engelberg-sequence-hash-combine obj engelberg-hash)
+        :else (throw (IllegalArgumentException. (format "alt-hash-1 called with object of class %s" (class obj))))))
+
+
 (defn print-hash-val-header []
   (println "        # hash     avg       max     hash fn")
   (println "# items  vals   collisions collision name")
@@ -106,7 +158,7 @@ murmur3-32 on the sequence of hash values of its elements."
 ;                       collision-bucket-size
 ;                       (freq-freq collision-bucket-size))))
 
-    (println (format "%7d %7d %10.1f %9d %s"
+    (println (format "%7d %7d %10.2f %9d %s"
                      (count coll)
                      (count hash-freq)
                      (/ (* 1.0 (count coll)) (count hash-freq))
@@ -118,9 +170,10 @@ murmur3-32 on the sequence of hash values of its elements."
 
 
 (defn print-all-hash-stats [coll]
-  (doseq [[hash-fn hash-fn-name] [[hash "hash"]
+  (doseq [[hash-fn hash-fn-name] [[hash "Clojure 1.5.1 hash"]
                                   [alt-hash-1 "alt-hash-1"]
-                                  [alt-hash-2 "alt-hash-2"]]]
+                                  [alt-hash-2 "alt-hash-2"]
+                                  [engelberg-hash "engelberg-hash"]]]
     (print-hash-stats coll hash-fn hash-fn-name)))
 
 
