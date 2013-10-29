@@ -232,8 +232,8 @@ function cmpf to compare elements of each sequence."
                 ;;4 4 [:R :R :N :N :N :N]
                 ;;5 5 [:K :K :N :R :B :Q]  ; ~1 sec
                 ;;5 6 [:K :K :N :R :B :Q]  ; sorted ~7 sec, unsorted ~10 sec
-                ;;6 6 [:K :K :N :R :B :Q]  ; sorted ~45 sec, unsorted ~7 mins
-                6 7 [:K :K :N :R :B :Q]  ; sorted ~4.5 mins, unsorted 
+                6 6 [:K :K :N :R :B :Q]  ; sorted ~45 sec, unsorted ~7 min
+                ;;6 7 [:K :K :N :R :B :Q]  ; sorted ~4.5 min, unsorted ~262 min
                 ;;6 9 [:K :K :N :R :B :Q]
                 ))]
       ;; (println (join "\n" solution))
