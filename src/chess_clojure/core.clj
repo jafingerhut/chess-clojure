@@ -131,6 +131,51 @@ murmur3-32 on the sequence of hash values of its elements."
                        (hash val) (alt-hash-0 val) val)))))
 
 
+(defn cmp-seq-lexi
+  "Compare sequences x and y lexicographically, using comparator
+function cmpf to compare elements of each sequence."
+  [cmpf x y]
+  (loop [x x
+         y y]
+    (if (seq x)
+      (if (seq y)
+        (let [c (cmpf (first x) (first y))]
+          (if (zero? c)
+            (recur (rest x) (rest y))
+            c))
+        ;; else we reached end of y first, so x > y
+        1)
+      (if (seq y)
+        ;; we reached end of x first, so x < y
+        -1
+        ;; Sequences contain same elements.  x = y
+        0))))
+
+
+;; If *set-type* is :sorted, solutions are sorted sets of vectors of
+;; the form [:keyword [int-x int-y]].  I do not care what order
+;; solutions are sorted in relative to each other, as long as they are
+;; comparable.
+(defn cmp-solns [a b]
+  (cmp-seq-lexi compare (seq a) (seq b)))
+
+
+(def all-set-types #{:sorted :unsorted})
+(def ^:dynamic *set-type* nil)
+
+
+(defn empty-solution []
+  (case *set-type*
+    :unsorted #{}
+    :sorted (sorted-set)))
+
+
+(defn solution-set [solns]
+  (case *set-type*
+    :unsorted (set solns)
+    :sorted (apply sorted-set-by cmp-solns solns)))
+
+
 (defn takes? [piece [dx dy]]
   (case piece
     :K (and (<= dx 1) (<= dy 1))
@@ -153,8 +198,8 @@ murmur3-32 on the sequence of hash values of its elements."
 
 (defn solve-wrapped [rows cols pieces]
   (if (empty? pieces)
-    #{#{}}
-    (set 
+    (solution-set [(empty-solution)])   ; #{#{}}
+    (solution-set
       (let [candidate (first pieces)]
         (for [solution (solve rows cols (rest pieces))
               x (range 0 cols)
@@ -164,29 +209,82 @@ murmur3-32 on the sequence of hash values of its elements."
 
 (defn solve [rows cols pieces]
   (let [x (solve-wrapped rows cols pieces)]
-    (println (format "Solve %s - e.g. %s" (seq pieces) (first x)))
+    (println (format "Solve %s example set elem %s" (seq pieces) (first x)))
     (print-all-hash-stats x)
     (check-alt-hash-0 x)
     x))
 
-(defn -main [& args]
+
+(defn do-coordinates [max-coord-seq]
   (print-hash-val-header)
-  (doseq [i (range 8 40 3)]
+  (doseq [i max-coord-seq]
     (let [pairs (for [x (range 0 i), y (range 0 i)] [x y])]
       (println (format "All-pairs in [0 0] thru [%d %d]" (dec i) (dec i)))
       (print-all-hash-stats pairs)
-      (check-alt-hash-0 pairs)))
-  
-  (println)
-  (print-hash-val-header)
-  (let [solution (solve
-                  ;3 3 [:K :K :R]
-                  ;4 4 [:R :R :N :N :N :N]
-                  ;5 5 [:K :K :N :R :B :Q]  ; ~1 sec
-                  5 6 [:K :K :N :R :B :Q]  ; ~10 sec
-                  ;6 6 [:K :K :N :R :B :Q]  ; ~3-4 mins
-                  ;6 7 [:K :K :N :R :B :Q]  ; longer
-                  ;6 9 [:K :K :N :R :B :Q]
-                  )]
-    ; (println (join "\n" solution))
-    (println (count solution))))
+      (check-alt-hash-0 pairs))))
+
+
+(defn do-nqueens [set-type]
+  (binding [*set-type* set-type]
+    (print-hash-val-header)
+    (let [solution (time (solve
+                ;;3 3 [:K :K :R]
+                ;;4 4 [:R :R :N :N :N :N]
+                ;;5 5 [:K :K :N :R :B :Q]  ; ~1 sec
+                ;;5 6 [:K :K :N :R :B :Q]  ; sorted ~7 sec, unsorted ~10 sec
+                ;;6 6 [:K :K :N :R :B :Q]  ; sorted ~45 sec, unsorted ~7 mins
+                6 7 [:K :K :N :R :B :Q]  ; sorted ~4.5 mins, unsorted 
+                ;;6 9 [:K :K :N :R :B :Q]
+                ))]
+      ;; (println (join "\n" solution))
+      (println (count solution)))))
+
+
+(def default-coordinates-args [20 50 100 400])
+
+
+(defn show-usage [prog-name]
+  (binding [*out* *err*]
+    (printf "usage:
+    %s [ help | -h | --help ]
+    %s all
+    %s nqueens { sorted | unsorted }
+    %s coordinates [ maxcoord1 maxcoord2 ... ]  (default %s)
+" prog-name prog-name prog-name prog-name default-coordinates-args)
+    (flush)))
+
+
+(def prog-name "lein run")
+
+
+(defn -main [& args]
+  (when (or (= 0 (count args))
+            (#{"-h" "--help" "-help" "help"} (first args)))
+    (show-usage prog-name)
+    (System/exit 0))
+  (let [[action & args] args]
+    (case action
+
+      "coordinates"
+      (let [coordinates-args (if (zero? (count args))
+                               default-coordinates-args
+                               (map #(Long/parseLong %) args))]
+        (do-coordinates coordinates-args))
+
+      "nqueens"
+      (let [set-type (keyword (first args))]
+        (if (and (= 1 (count args))
+                 (all-set-types set-type))
+          (do-nqueens set-type)
+          (do (binding [*out* *err*]
+                (printf "Wrong number of args for 'nqueens' action\n"))
+              (show-usage prog-name)
+              (System/exit 1))))
+
+      "all"
+      (do
+        (do-coordinates default-coordinates-args)
+        (println "\nnqueens sorted\n")
+        (do-nqueens :sorted)
+        (println "\nnqueens unsorted\n")
+        (do-nqueens :unsorted)))))
