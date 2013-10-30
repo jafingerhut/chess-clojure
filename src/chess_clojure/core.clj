@@ -48,11 +48,18 @@
   (sequence-hash-combine s 31 element-hash-fn))
 
 
-(defn engelberg-sequence-hash-combine
+(defn engelberg-sequence-hash-combine-2013-10-29
   "Recommended hash for vectors and sequences from Mark Engelberg's
 hashing executive summary document as of Oct 29 2013."
   [s element-hash-fn]
   (sequence-hash-combine s 524287 element-hash-fn))
+
+
+(defn engelberg-sequence-hash-combine-2013-10-30
+  "Recommended hash for vectors and sequences from Mark Engelberg's
+hashing executive summary document as of Oct 30 2013."
+  [s element-hash-fn]
+  (sequence-hash-combine s 122949829 element-hash-fn))
 
 
 (defn alt-integer-hash [i]
@@ -64,7 +71,7 @@ hashing executive summary document as of Oct 29 2013."
         :else (hash i)))
 
 
-(defn engelberg-long-hash-munge
+(defn engelberg-long-hash-munge-2013-10-29
   "Recommended hash for longs from Mark Engelberg's hashing executive
 summary document as of Oct 29 2013."
   [i]
@@ -78,7 +85,21 @@ summary document as of Oct 29 2013."
     (hash i)))
 
 
-(defn engelberg-xor-shift-32
+(defn engelberg-long-hash-munge-2013-10-30
+  "Recommended hash for longs from Mark Engelberg's hashing executive
+summary document as of Oct 30 2013."
+  [i]
+  (if (<= Long/MIN_VALUE i Long/MAX_VALUE)
+    (let [a (unchecked-long i)
+          a (p/bit-xor a (p/<<  a 13))
+          a (p/bit-xor a (p/>>> a  7))
+          a (p/bit-xor a (p/<<  a 17))
+          a (p/bit-xor a (p/>>> a 32))]
+      (unchecked-int a))
+    (hash i)))
+
+
+(defn engelberg-xor-shift-32-2013-10-29
   "Recommended modification to hash values of set elements before they
 are added together, from Mark Engelberg's hashing executive summary
 document as of Oct 29 2013."
@@ -87,6 +108,18 @@ document as of Oct 29 2013."
         a (unchecked-int (p/bit-xor a (p/<<  a  3)))
         a (unchecked-int (p/bit-xor a (p/>>> a  1)))
         a (unchecked-int (p/bit-xor a (p/<<  a 14)))]
+    (unchecked-int a)))
+
+
+(defn engelberg-xor-shift-32-2013-10-30
+  "Recommended modification to hash values of set elements before they
+are added together, from Mark Engelberg's hashing executive summary
+document as of Oct 30 2013."
+  [i]
+  (let [a (unchecked-int i)
+        a (unchecked-int (p/bit-xor a (p/<<  a 13)))
+        a (unchecked-int (p/bit-xor a (p/>>> a 17)))
+        a (unchecked-int (p/bit-xor a (p/<<  a  5)))]
     (unchecked-int a)))
 
 
@@ -122,21 +155,37 @@ murmur3-32 on the sequence of hash values of its elements."
         (keyword? obj) (hash obj)
         (set? obj) (unchecked-int (reduce + (map alt-hash-2 obj)))
         (vector? obj) (murmur3-32 (map alt-hash-2 obj) 0)
-        :else (throw (IllegalArgumentException. (format "alt-hash-1 called with object of class %s" (class obj))))))
+        :else (throw (IllegalArgumentException. (format "alt-hash-2 called with object of class %s" (class obj))))))
 
 
-(defn engelberg-hash
+(defn engelberg-hash-2013-10-29
   "Combines all recommendations from Mark Engelberg's Oct 29 2013
 executive summary document, except for those on maps."
   [obj]
-  (cond (integer? obj) (engelberg-long-hash-munge obj)
+  (cond (integer? obj) (engelberg-long-hash-munge-2013-10-29 obj)
         (keyword? obj) (hash obj)
         (set? obj) (unchecked-int (reduce + (map (fn [x]
-                                                   (engelberg-xor-shift-32
-                                                    (engelberg-hash x)))
+                                                   (engelberg-xor-shift-32-2013-10-29
+                                                    (engelberg-hash-2013-10-29 x)))
                                                  obj)))
-        (vector? obj) (engelberg-sequence-hash-combine obj engelberg-hash)
-        :else (throw (IllegalArgumentException. (format "alt-hash-1 called with object of class %s" (class obj))))))
+        (vector? obj) (engelberg-sequence-hash-combine-2013-10-29
+                       obj engelberg-hash-2013-10-29)
+        :else (throw (IllegalArgumentException. (format "engelberg-hash-2013-10-29 called with object of class %s" (class obj))))))
+
+
+(defn engelberg-hash-2013-10-30
+  "Combines all recommendations from Mark Engelberg's Oct 30 2013
+executive summary document, except for those on maps."
+  [obj]
+  (cond (integer? obj) (engelberg-long-hash-munge-2013-10-30 obj)
+        (keyword? obj) (hash obj)
+        (set? obj) (unchecked-int (reduce + (map (fn [x]
+                                                   (engelberg-xor-shift-32-2013-10-30
+                                                    (engelberg-hash-2013-10-30 x)))
+                                                 obj)))
+        (vector? obj) (engelberg-sequence-hash-combine-2013-10-30
+                       obj engelberg-hash-2013-10-30)
+        :else (throw (IllegalArgumentException. (format "engelberg-hash-2013-10-30 called with object of class %s" (class obj))))))
 
 
 (defn print-hash-val-header []
@@ -173,7 +222,9 @@ executive summary document, except for those on maps."
   (doseq [[hash-fn hash-fn-name] [[hash "Clojure 1.5.1 hash"]
                                   [alt-hash-1 "alt-hash-1"]
                                   [alt-hash-2 "alt-hash-2"]
-                                  [engelberg-hash "engelberg-hash"]]]
+                                  [engelberg-hash-2013-10-29 "engelberg-hash-2013-10-29"]
+                                  [engelberg-hash-2013-10-30 "engelberg-hash-2013-10-30"]
+                                  ]]
     (print-hash-stats coll hash-fn hash-fn-name)))
 
 
