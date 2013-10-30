@@ -26,7 +26,7 @@ All-pairs in [0 0] thru [399 399]
  160000  160000       1.00         1 engelberg-hash-2013-10-29
  160000  159998       1.00         2 engelberg-hash-2013-10-30
 
-nqueens sorted
+nqueens sorted-set
 
         # hash     avg       max     hash fn
 # items  vals   collisions collision name
@@ -65,18 +65,18 @@ Solve (:K :N :R :B :Q) example set elem #{[:B [0 0]] [:K [0 2]] [:N [0 4]] [:Q [
  132832     260     510.89      3700 Clojure 1.5.1 hash
  132832    4720      28.14      1044 alt-hash-1
  132832  132830       1.00         2 alt-hash-2
- 132832  132653       1.00         3 engelberg-hash-2013-10-29
- 132832  132830       1.00         2 engelberg-hash-2013-10-30
+ 132832  132655       1.00         3 engelberg-hash-2013-10-29
+ 132832  132829       1.00         2 engelberg-hash-2013-10-30
 Solve (:K :K :N :R :B :Q) example set elem #{[:B [0 0]] [:K [0 2]] [:K [0 4]] [:N [2 0]] [:Q [4 3]] [:R [3 1]]}
  180568     301     599.89      4976 Clojure 1.5.1 hash
  180568    8321      21.70      1648 alt-hash-1
  180568  180567       1.00         2 alt-hash-2
- 180568  180419       1.00         2 engelberg-hash-2013-10-29
- 180568  180566       1.00         2 engelberg-hash-2013-10-30
-"Elapsed time: 53607.259 msecs"
+ 180568  180427       1.00         2 engelberg-hash-2013-10-29
+ 180568  180563       1.00         2 engelberg-hash-2013-10-30
+"Elapsed time: 52599.185 msecs"
 180568
 
-nqueens unsorted
+nqueens hash-set
 
         # hash     avg       max     hash fn
 # items  vals   collisions collision name
@@ -115,13 +115,13 @@ Solve (:K :N :R :B :Q) example set elem #{[:N [2 0]] [:R [4 2]] [:K [0 0]] [:Q [
  132832     260     510.89      3700 Clojure 1.5.1 hash
  132832    4720      28.14      1044 alt-hash-1
  132832  132830       1.00         2 alt-hash-2
- 132832  132653       1.00         3 engelberg-hash-2013-10-29
- 132832  132830       1.00         2 engelberg-hash-2013-10-30
+ 132832  132655       1.00         3 engelberg-hash-2013-10-29
+ 132832  132829       1.00         2 engelberg-hash-2013-10-30
 Solve (:K :K :N :R :B :Q) example set elem #{[:N [5 0]] [:K [5 2]] [:K [5 4]] [:R [2 1]] [:Q [3 3]] [:B [4 0]]}
  180568     301     599.89      4976 Clojure 1.5.1 hash
  180568    8321      21.70      1648 alt-hash-1
  180568  180567       1.00         2 alt-hash-2
- 180568  180419       1.00         2 engelberg-hash-2013-10-29
- 180568  180566       1.00         2 engelberg-hash-2013-10-30
-"Elapsed time: 405470.997 msecs"
+ 180568  180427       1.00         2 engelberg-hash-2013-10-29
+ 180568  180563       1.00         2 engelberg-hash-2013-10-30
+"Elapsed time: 398223.528 msecs"
 180568
