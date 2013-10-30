@@ -5,22 +5,26 @@ All-pairs in [0 0] thru [19 19]
     400     400       1.00         1 Clojure 1.5.1 hash
     400     400       1.00         1 alt-hash-1
     400     400       1.00         1 alt-hash-2
-    400     400       1.00         1 engelberg-hash
+    400     400       1.00         1 engelberg-hash-2013-10-29
+    400     400       1.00         1 engelberg-hash-2013-10-30
 All-pairs in [0 0] thru [49 49]
    2500    1569       1.59         2 Clojure 1.5.1 hash
    2500    2500       1.00         1 alt-hash-1
    2500    2500       1.00         1 alt-hash-2
-   2500    2500       1.00         1 engelberg-hash
+   2500    2500       1.00         1 engelberg-hash-2013-10-29
+   2500    2500       1.00         1 engelberg-hash-2013-10-30
 All-pairs in [0 0] thru [99 99]
   10000    3169       3.16         4 Clojure 1.5.1 hash
   10000   10000       1.00         1 alt-hash-1
   10000   10000       1.00         1 alt-hash-2
-  10000   10000       1.00         1 engelberg-hash
+  10000   10000       1.00         1 engelberg-hash-2013-10-29
+  10000   10000       1.00         1 engelberg-hash-2013-10-30
 All-pairs in [0 0] thru [399 399]
  160000   12769      12.53        13 Clojure 1.5.1 hash
  160000  160000       1.00         1 alt-hash-1
  160000  159996       1.00         2 alt-hash-2
- 160000  160000       1.00         1 engelberg-hash
+ 160000  160000       1.00         1 engelberg-hash-2013-10-29
+ 160000  159998       1.00         2 engelberg-hash-2013-10-30
 
 nqueens sorted
 
@@ -31,38 +35,45 @@ Solve null example set elem #{}
       1       1       1.00         1 Clojure 1.5.1 hash
       1       1       1.00         1 alt-hash-1
       1       1       1.00         1 alt-hash-2
-      1       1       1.00         1 engelberg-hash
+      1       1       1.00         1 engelberg-hash-2013-10-29
+      1       1       1.00         1 engelberg-hash-2013-10-30
 Solve (:Q) example set elem #{[:Q [0 0]]}
      36      36       1.00         1 Clojure 1.5.1 hash
      36      36       1.00         1 alt-hash-1
      36      36       1.00         1 alt-hash-2
-     36      36       1.00         1 engelberg-hash
+     36      36       1.00         1 engelberg-hash-2013-10-29
+     36      36       1.00         1 engelberg-hash-2013-10-30
 Solve (:B :Q) example set elem #{[:B [0 0]] [:Q [1 2]]}
     680      73       9.32        24 Clojure 1.5.1 hash
     680     170       4.00         4 alt-hash-1
     680     680       1.00         1 alt-hash-2
-    680     680       1.00         1 engelberg-hash
+    680     680       1.00         1 engelberg-hash-2013-10-29
+    680     680       1.00         1 engelberg-hash-2013-10-30
 Solve (:R :B :Q) example set elem #{[:B [0 0]] [:Q [1 2]] [:R [2 4]]}
    6144      96      64.00       162 Clojure 1.5.1 hash
    6144     380      16.17        24 alt-hash-1
    6144    6144       1.00         1 alt-hash-2
-   6144    6133       1.00         2 engelberg-hash
+   6144    6133       1.00         2 engelberg-hash-2013-10-29
+   6144    6144       1.00         1 engelberg-hash-2013-10-30
 Solve (:N :R :B :Q) example set elem #{[:B [0 0]] [:N [0 1]] [:Q [1 4]] [:R [3 5]]}
   31920     181     176.35      1088 Clojure 1.5.1 hash
   31920    1924      16.59       240 alt-hash-1
   31920   31920       1.00         1 alt-hash-2
-  31920   31864       1.00         2 engelberg-hash
+  31920   31864       1.00         2 engelberg-hash-2013-10-29
+  31920   31920       1.00         1 engelberg-hash-2013-10-30
 Solve (:K :N :R :B :Q) example set elem #{[:B [0 0]] [:K [0 2]] [:N [0 4]] [:Q [2 1]] [:R [1 5]]}
  132832     260     510.89      3700 Clojure 1.5.1 hash
  132832    4720      28.14      1044 alt-hash-1
  132832  132830       1.00         2 alt-hash-2
- 132832  132653       1.00         3 engelberg-hash
+ 132832  132653       1.00         3 engelberg-hash-2013-10-29
+ 132832  132830       1.00         2 engelberg-hash-2013-10-30
 Solve (:K :K :N :R :B :Q) example set elem #{[:B [0 0]] [:K [0 2]] [:K [0 4]] [:N [2 0]] [:Q [4 3]] [:R [3 1]]}
  180568     301     599.89      4976 Clojure 1.5.1 hash
  180568    8321      21.70      1648 alt-hash-1
  180568  180567       1.00         2 alt-hash-2
- 180568  180419       1.00         2 engelberg-hash
-"Elapsed time: 49571.018 msecs"
+ 180568  180419       1.00         2 engelberg-hash-2013-10-29
+ 180568  180566       1.00         2 engelberg-hash-2013-10-30
+"Elapsed time: 53607.259 msecs"
 180568
 
 nqueens unsorted
@@ -74,36 +85,43 @@ Solve null example set elem #{}
       1       1       1.00         1 Clojure 1.5.1 hash
       1       1       1.00         1 alt-hash-1
       1       1       1.00         1 alt-hash-2
-      1       1       1.00         1 engelberg-hash
+      1       1       1.00         1 engelberg-hash-2013-10-29
+      1       1       1.00         1 engelberg-hash-2013-10-30
 Solve (:Q) example set elem #{[:Q [5 0]]}
      36      36       1.00         1 Clojure 1.5.1 hash
      36      36       1.00         1 alt-hash-1
      36      36       1.00         1 alt-hash-2
-     36      36       1.00         1 engelberg-hash
+     36      36       1.00         1 engelberg-hash-2013-10-29
+     36      36       1.00         1 engelberg-hash-2013-10-30
 Solve (:B :Q) example set elem #{[:Q [5 0]] [:B [3 1]]}
     680      73       9.32        24 Clojure 1.5.1 hash
     680     170       4.00         4 alt-hash-1
     680     680       1.00         1 alt-hash-2
-    680     680       1.00         1 engelberg-hash
+    680     680       1.00         1 engelberg-hash-2013-10-29
+    680     680       1.00         1 engelberg-hash-2013-10-30
 Solve (:R :B :Q) example set elem #{[:Q [5 0]] [:R [2 1]] [:B [4 2]]}
    6144      96      64.00       162 Clojure 1.5.1 hash
    6144     380      16.17        24 alt-hash-1
    6144    6144       1.00         1 alt-hash-2
-   6144    6133       1.00         2 engelberg-hash
+   6144    6133       1.00         2 engelberg-hash-2013-10-29
+   6144    6144       1.00         1 engelberg-hash-2013-10-30
 Solve (:N :R :B :Q) example set elem #{[:N [0 1]] [:R [1 2]] [:Q [2 4]] [:B [0 0]]}
   31920     181     176.35      1088 Clojure 1.5.1 hash
   31920    1924      16.59       240 alt-hash-1
   31920   31920       1.00         1 alt-hash-2
-  31920   31864       1.00         2 engelberg-hash
+  31920   31864       1.00         2 engelberg-hash-2013-10-29
+  31920   31920       1.00         1 engelberg-hash-2013-10-30
 Solve (:K :N :R :B :Q) example set elem #{[:N [2 0]] [:R [4 2]] [:K [0 0]] [:Q [1 3]] [:B [3 0]]}
  132832     260     510.89      3700 Clojure 1.5.1 hash
  132832    4720      28.14      1044 alt-hash-1
  132832  132830       1.00         2 alt-hash-2
- 132832  132653       1.00         3 engelberg-hash
+ 132832  132653       1.00         3 engelberg-hash-2013-10-29
+ 132832  132830       1.00         2 engelberg-hash-2013-10-30
 Solve (:K :K :N :R :B :Q) example set elem #{[:N [5 0]] [:K [5 2]] [:K [5 4]] [:R [2 1]] [:Q [3 3]] [:B [4 0]]}
  180568     301     599.89      4976 Clojure 1.5.1 hash
  180568    8321      21.70      1648 alt-hash-1
  180568  180567       1.00         2 alt-hash-2
- 180568  180419       1.00         2 engelberg-hash
-"Elapsed time: 402070.858 msecs"
+ 180568  180419       1.00         2 engelberg-hash-2013-10-29
+ 180568  180566       1.00         2 engelberg-hash-2013-10-30
+"Elapsed time: 405470.997 msecs"
 180568
