@@ -40,7 +40,7 @@
       (if (seq s)
         (recur (rest s)
                (unchecked-int (p/+ (p/* h multiplier)
-                                   (int (element-hash-fn (first s))))))
+                                   (unchecked-int (element-hash-fn (first s))))))
         h))))
 
 
@@ -52,14 +52,14 @@
   "Recommended hash for vectors and sequences from Mark Engelberg's
 hashing executive summary document as of Oct 29 2013."
   [s element-hash-fn]
-  (sequence-hash-combine s 524287 element-hash-fn))
+  (unchecked-int (sequence-hash-combine s 524287 element-hash-fn)))
 
 
 (defn engelberg-sequence-hash-combine-2013-10-30
   "Recommended hash for vectors and sequences from Mark Engelberg's
 hashing executive summary document as of Oct 30 2013."
   [s element-hash-fn]
-  (sequence-hash-combine s 122949829 element-hash-fn))
+  (unchecked-int (sequence-hash-combine s 122949829 element-hash-fn)))
 
 
 (defn alt-integer-hash [i]
@@ -104,11 +104,16 @@ summary document as of Oct 30 2013."
 are added together, from Mark Engelberg's hashing executive summary
 document as of Oct 29 2013."
   [i]
-  (let [a (unchecked-int i)
-        a (unchecked-int (p/bit-xor a (p/<<  a  3)))
-        a (unchecked-int (p/bit-xor a (p/>>> a  1)))
-        a (unchecked-int (p/bit-xor a (p/<<  a 14)))]
-    (unchecked-int a)))
+  (let [i (unchecked-int i)
+        int32-mask (long 0xffffffff)
+        ;; Make a long that has no sign extension
+        i (p/bit-and int32-mask (long i))
+        ;; Be careful to preserve no sign extension bits creeping into
+        ;; intermediate calculations.
+        i (p/bit-and int32-mask (p/bit-xor i (p/<<  i  3)))
+        i (p/bit-and int32-mask (p/bit-xor i (p/>>> i  1)))
+        i (p/bit-and int32-mask (p/bit-xor i (p/<<  i 14)))]
+    (unchecked-int i)))
 
 
 (defn engelberg-xor-shift-32-2013-10-30
@@ -116,11 +121,16 @@ document as of Oct 29 2013."
 are added together, from Mark Engelberg's hashing executive summary
 document as of Oct 30 2013."
   [i]
-  (let [a (unchecked-int i)
-        a (unchecked-int (p/bit-xor a (p/<<  a 13)))
-        a (unchecked-int (p/bit-xor a (p/>>> a 17)))
-        a (unchecked-int (p/bit-xor a (p/<<  a  5)))]
-    (unchecked-int a)))
+  (let [i (unchecked-int i)
+        int32-mask (long 0xffffffff)
+        ;; Make a long that has no sign extension
+        i (p/bit-and int32-mask (long i))
+        ;; Be careful to preserve no sign extension bits creeping into
+        ;; intermediate calculations.
+        i (p/bit-and int32-mask (p/bit-xor i (p/<<  i 13)))
+        i (p/bit-and int32-mask (p/bit-xor i (p/>>> i 17)))
+        i (p/bit-and int32-mask (p/bit-xor i (p/<<  i  5)))]
+    (unchecked-int i)))
 
 
 (defn alt-hash-0
@@ -219,7 +229,7 @@ executive summary document, except for those on maps."
 
 
 (defn print-all-hash-stats [coll]
-  (doseq [[hash-fn hash-fn-name] [[hash "Clojure 1.5.1 hash"]
+  (doseq [[hash-fn hash-fn-name] [[hash (str "Clojure " (clojure-version) " hash")]
                                   [alt-hash-1 "alt-hash-1"]
                                   [alt-hash-2 "alt-hash-2"]
                                   [engelberg-hash-2013-10-29 "engelberg-hash-2013-10-29"]
@@ -228,11 +238,21 @@ executive summary document, except for those on maps."
     (print-hash-stats coll hash-fn hash-fn-name)))
 
 
-(defn check-alt-hash-0 [coll]
-  (doseq [val coll]
-    (when (not= (hash val) (alt-hash-0 val))
-      (println (format "Found val with hash=0x%08x but alt-hash-0=0x%08x: %s"
-                       (hash val) (alt-hash-0 val) val)))))
+(def reimplementation-of-clojure-hash
+  (case (clojure-version)
+    ;; For running with Clojure 1.5.1 unmodified
+    "1.5.1" {:fn alt-hash-0 :name "alt-hash-0"}
+    ;; For running with a version of Clojure with hash modified
+    "1.6.0-master-SNAPSHOT" {:fn engelberg-hash-2013-10-30
+                             :name "engelberg-hash-2013-10-30"}))
+
+(defn check-java-vs-clojure-hash [coll]
+  (let [hash-fn (:fn reimplementation-of-clojure-hash)
+        hash-name (:name reimplementation-of-clojure-hash)]
+    (doseq [val coll]
+      (when (not= (hash val) (hash-fn val))
+        (println (format "Found val with hash=0x%08x but %s=0x%08x: %s"
+                         (hash val) hash-name (hash-fn val) val))))))
 
 
 (defn cmp-seq-lexi
@@ -256,28 +276,31 @@ function cmpf to compare elements of each sequence."
         0))))
 
 
-;; If *set-type* is :sorted, solutions are sorted sets of vectors of
-;; the form [:keyword [int-x int-y]].  I do not care what order
+;; If *set-type* is :sorted-set, solutions are sorted sets of vectors
+;; of the form [:keyword [int-x int-y]].  I do not care what order
 ;; solutions are sorted in relative to each other, as long as they are
 ;; comparable.
 (defn cmp-solns [a b]
   (cmp-seq-lexi compare (seq a) (seq b)))
 
 
-(def all-set-types #{:sorted :unsorted})
+(def all-set-types #{:sorted-set :hash-set})
 (def ^:dynamic *set-type* nil)
+;; Change *show-hash-stats* to false to skip showing hash stats.
+;; Enabling them slows down the run time of the code.
+(def ^:dynamic *show-hash-stats* true)
 
 
 (defn empty-solution []
   (case *set-type*
-    :unsorted #{}
-    :sorted (sorted-set)))
+    :hash-set #{}
+    :sorted-set (sorted-set)))
 
 
 (defn solution-set [solns]
   (case *set-type*
-    :unsorted (set solns)
-    :sorted (apply sorted-set-by cmp-solns solns)))
+    :hash-set (set solns)
+    :sorted-set (apply sorted-set-by cmp-solns solns)))
 
 
 (defn takes? [piece [dx dy]]
@@ -313,9 +336,10 @@ function cmpf to compare elements of each sequence."
 
 (defn solve [rows cols pieces]
   (let [x (solve-wrapped rows cols pieces)]
-    (println (format "Solve %s example set elem %s" (seq pieces) (first x)))
-    (print-all-hash-stats x)
-    (check-alt-hash-0 x)
+    (when *show-hash-stats*
+      (println (format "Solve %s example set elem %s" (seq pieces) (first x)))
+      (print-all-hash-stats x)
+      (check-java-vs-clojure-hash x))
     x))
 
 
@@ -325,7 +349,7 @@ function cmpf to compare elements of each sequence."
     (let [pairs (for [x (range 0 i), y (range 0 i)] [x y])]
       (println (format "All-pairs in [0 0] thru [%d %d]" (dec i) (dec i)))
       (print-all-hash-stats pairs)
-      (check-alt-hash-0 pairs))))
+      (check-java-vs-clojure-hash pairs))))
 
 
 (defn do-nqueens [set-type]
@@ -335,9 +359,9 @@ function cmpf to compare elements of each sequence."
                 ;;3 3 [:K :K :R]
                 ;;4 4 [:R :R :N :N :N :N]
                 ;;5 5 [:K :K :N :R :B :Q]  ; ~1 sec
-                ;;5 6 [:K :K :N :R :B :Q]  ; sorted ~7 sec, unsorted ~10 sec
-                6 6 [:K :K :N :R :B :Q]  ; sorted ~45 sec, unsorted ~7 min
-                ;;6 7 [:K :K :N :R :B :Q]  ; sorted ~4.5 min, unsorted ~262 min
+                ;;5 6 [:K :K :N :R :B :Q]  ; sorted-set ~7 sec, hash-set ~10 sec
+                6 6 [:K :K :N :R :B :Q]  ; sorted-set ~45 sec, hash-set ~7 min
+                ;;6 7 [:K :K :N :R :B :Q]  ; sorted-set ~4.5 min, hash-set ~262 min
                 ;;6 9 [:K :K :N :R :B :Q]
                 ))]
       ;; (println (join "\n" solution))
@@ -352,7 +376,7 @@ function cmpf to compare elements of each sequence."
     (printf "usage:
     %s [ help | -h | --help ]
     %s all
-    %s nqueens { sorted | unsorted }
+    %s nqueens { sorted-set | hash-set }
     %s coordinates [ maxcoord1 maxcoord2 ... ]  (default %s)
 " prog-name prog-name prog-name prog-name default-coordinates-args)
     (flush)))
@@ -388,7 +412,7 @@ function cmpf to compare elements of each sequence."
       "all"
       (do
         (do-coordinates default-coordinates-args)
-        (println "\nnqueens sorted\n")
-        (do-nqueens :sorted)
-        (println "\nnqueens unsorted\n")
-        (do-nqueens :unsorted)))))
+        (println "\nnqueens sorted-set\n")
+        (do-nqueens :sorted-set)
+        (println "\nnqueens hash-set\n")
+        (do-nqueens :hash-set)))))
