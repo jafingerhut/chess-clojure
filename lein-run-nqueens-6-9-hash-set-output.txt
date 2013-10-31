@@ -53,6 +53,6 @@ Solve (:K :K :N :R :B :Q) example set elem #{[:R [4 3]] [:N [8 2]] [:K [6 4]] [:
 "Elapsed time: 3170004.716 msecs"
 20136752
 
-When run with *show-hash-sets* false instead, it is much faster,
+When run with *show-hash-stats* false instead, it is much faster,
 about 11.2 mins:
 Elapsed time: 669794.208 msecs
