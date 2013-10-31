@@ -5,4 +5,4 @@
                  [primitive-math "0.1.3"]
                  [org.clojure/math.numeric-tower "0.0.2"]]
   :main chess-clojure.core
-  :jvm-opts ^:replace ["-server" "-Xms4G" "-Xmx4G" "-XX:NewRatio=8"])
+  :jvm-opts ^:replace ["-server" "-Xms4G" "-Xmx12G" "-XX:NewRatio=8"])

@@ -135,9 +135,9 @@ document as of Oct 30 2013."
 
 (defn alt-hash-0
   "(alt-hash-0 obj) is intended to return the same value as (hash obj)
-for all integers, keywords, sets, and vectors, with nesting of
-collections allowed.  Throws an exception if any other types are
-encountered."
+in Clojure 1.5.1 for all integers, keywords, sets, and vectors, with
+nesting of collections allowed.  Throws an exception if any other
+types are encountered."
   [obj]
   (cond (integer? obj) (hash obj)
         (keyword? obj) (hash obj)
@@ -147,8 +147,8 @@ encountered."
 
 
 (defn alt-hash-1
-  "alt-hash-1 is same as alt-hash-0 and hash, except ints and longs
-are hashed using murmur3-32."
+  "alt-hash-1 is same as alt-hash-0 and Clojure 1.5.1 hash, except
+ints and longs are hashed using murmur3-32."
   [obj]
   (cond (integer? obj) (alt-integer-hash obj)
         (keyword? obj) (hash obj)
@@ -230,6 +230,7 @@ executive summary document, except for those on maps."
 
 (defn print-all-hash-stats [coll]
   (doseq [[hash-fn hash-fn-name] [[hash (str "Clojure " (clojure-version) " hash")]
+                                  [alt-hash-0 "alt-hash-0 (should be same as Clojure 1.5.1 hash)"]
                                   [alt-hash-1 "alt-hash-1"]
                                   [alt-hash-2 "alt-hash-2"]
                                   [engelberg-hash-2013-10-29 "engelberg-hash-2013-10-29"]
@@ -336,8 +337,8 @@ function cmpf to compare elements of each sequence."
 
 (defn solve [rows cols pieces]
   (let [x (solve-wrapped rows cols pieces)]
+    (println (format "Solve %s example set elem %s" (seq pieces) (first x)))
     (when *show-hash-stats*
-      (println (format "Solve %s example set elem %s" (seq pieces) (first x)))
       (print-all-hash-stats x)
       (check-java-vs-clojure-hash x))
     x))
@@ -362,7 +363,7 @@ function cmpf to compare elements of each sequence."
                 ;;5 6 [:K :K :N :R :B :Q]  ; sorted-set ~7 sec, hash-set ~10 sec
                 6 6 [:K :K :N :R :B :Q]  ; sorted-set ~45 sec, hash-set ~7 min
                 ;;6 7 [:K :K :N :R :B :Q]  ; sorted-set ~4.5 min, hash-set ~262 min
-                ;;6 9 [:K :K :N :R :B :Q]
+                ;;6 9 [:K :K :N :R :B :Q]  ; this is the one that Paul Butcher waited about a day for the Clojure version to finish
                 ))]
       ;; (println (join "\n" solution))
       (println (count solution)))))
