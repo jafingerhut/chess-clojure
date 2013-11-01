@@ -1,3 +1,13 @@
+Run below uses Git repo code latest version as of 2013-11-01, with
+Clojure 1.6.0-master-SNAPSHOT that is latest Clojure master from
+2013-10-25, plus Andy's experimental changes to the hash function that
+should match Mark Engelberg's proposal dated 2013-10-30, which is also
+called engelberg-hash-2013-10-30 below.
+
+The nqueens-solving function is called with arguments for a 6x9 board.
+
+% lein run nqueens hash-set
+
         # hash     avg       max     hash fn
 # items  vals   collisions collision name
 ------- ------- ---------- --------- -----------
@@ -8,6 +18,7 @@ Solve null example set elem #{}
       1       1       1.00         1 alt-hash-2
       1       1       1.00         1 engelberg-hash-2013-10-29
       1       1       1.00         1 engelberg-hash-2013-10-30
+      1       1       1.00         1 engelberg-hash-2013-10-31
 Solve (:Q) example set elem #{[:Q [2 3]]}
      54      54       1.00         1 Clojure 1.6.0-master-SNAPSHOT hash
      54      54       1.00         1 alt-hash-0 (should be same as Clojure 1.5.1 hash)
@@ -15,6 +26,7 @@ Solve (:Q) example set elem #{[:Q [2 3]]}
      54      54       1.00         1 alt-hash-2
      54      54       1.00         1 engelberg-hash-2013-10-29
      54      54       1.00         1 engelberg-hash-2013-10-30
+     54      54       1.00         1 engelberg-hash-2013-10-31
 Solve (:B :Q) example set elem #{[:Q [4 3]] [:B [8 2]]}
    1760    1760       1.00         1 Clojure 1.6.0-master-SNAPSHOT hash
    1760     351       5.01        16 alt-hash-0 (should be same as Clojure 1.5.1 hash)
@@ -22,6 +34,7 @@ Solve (:B :Q) example set elem #{[:Q [4 3]] [:B [8 2]]}
    1760    1760       1.00         1 alt-hash-2
    1760    1757       1.00         2 engelberg-hash-2013-10-29
    1760    1760       1.00         1 engelberg-hash-2013-10-30
+   1760    1760       1.00         1 engelberg-hash-2013-10-31
 Solve (:R :B :Q) example set elem #{[:R [5 3]] [:Q [0 5]] [:B [4 0]]}
   32376   32376       1.00         1 Clojure 1.6.0-master-SNAPSHOT hash
   32376     950      34.08       138 alt-hash-0 (should be same as Clojure 1.5.1 hash)
@@ -29,6 +42,7 @@ Solve (:R :B :Q) example set elem #{[:R [5 3]] [:Q [0 5]] [:B [4 0]]}
   32376   32376       1.00         1 alt-hash-2
   32376   32245       1.00         2 engelberg-hash-2013-10-29
   32376   32376       1.00         1 engelberg-hash-2013-10-30
+  32376   32376       1.00         1 engelberg-hash-2013-10-31
 Solve (:N :R :B :Q) example set elem #{[:Q [1 4]] [:N [3 0]] [:R [7 3]] [:B [2 0]]}
  408852  408830       1.00         2 Clojure 1.6.0-master-SNAPSHOT hash
  408852    4200      97.35      1684 alt-hash-0 (should be same as Clojure 1.5.1 hash)
@@ -36,6 +50,7 @@ Solve (:N :R :B :Q) example set elem #{[:Q [1 4]] [:N [3 0]] [:R [7 3]] [:B [2 0
  408852  408831       1.00         2 alt-hash-2
  408852  406858       1.00         5 engelberg-hash-2013-10-29
  408852  408830       1.00         2 engelberg-hash-2013-10-30
+ 408852  408830       1.00         2 engelberg-hash-2013-10-31
 Solve (:K :N :R :B :Q) example set elem #{[:B [7 2]] [:R [6 0]] [:K [1 2]] [:Q [4 3]] [:N [7 5]]}
 4581348 4578883       1.00         3 Clojure 1.6.0-master-SNAPSHOT hash
 4581348    9383     488.26     19302 alt-hash-0 (should be same as Clojure 1.5.1 hash)
@@ -43,6 +58,7 @@ Solve (:K :N :R :B :Q) example set elem #{[:B [7 2]] [:R [6 0]] [:K [1 2]] [:Q [
 4581348 4578863       1.00         2 alt-hash-2
 4581348 4552561       1.01         4 engelberg-hash-2013-10-29
 4581348 4578883       1.00         3 engelberg-hash-2013-10-30
+4581348 4578883       1.00         3 engelberg-hash-2013-10-31
 Solve (:K :K :N :R :B :Q) example set elem #{[:R [4 3]] [:N [8 2]] [:K [6 4]] [:B [8 1]] [:K [2 1]] [:Q [0 0]]}
 20136752 20089488       1.00         3 Clojure 1.6.0-master-SNAPSHOT hash
 20136752   17936    1122.70     81610 alt-hash-0 (should be same as Clojure 1.5.1 hash)
@@ -50,9 +66,10 @@ Solve (:K :K :N :R :B :Q) example set elem #{[:R [4 3]] [:N [8 2]] [:K [6 4]] [:
 20136752 20089859       1.00         3 alt-hash-2
 20136752 19946616       1.01         5 engelberg-hash-2013-10-29
 20136752 20089488       1.00         3 engelberg-hash-2013-10-30
-"Elapsed time: 3170004.716 msecs"
+20136752 20089488       1.00         3 engelberg-hash-2013-10-31
+"Elapsed time: 3624957.511 msecs"
 20136752
 
 When run with *show-hash-stats* false instead, it is much faster,
-about 11.2 mins:
-Elapsed time: 669794.208 msecs
+about 11.8 mins:
+"Elapsed time: 710893.933 msecs"
