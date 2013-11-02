@@ -43,7 +43,7 @@ a long time and then finally run out of memory.  12 GB is enough, and
 perhaps less would suffice, too.
 
 If you want to do a timing run for the N-queens function by itself, be
-sure to change *show-hash-stats* to false.  Calculating the stats
+sure to change `*show-hash-stats*` to false.  Calculating the stats
 takes significant extra CPU time.
 
 
