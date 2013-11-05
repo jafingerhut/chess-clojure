@@ -394,6 +394,48 @@ function cmpf to compare elements of each sequence."
       (println (count solution)))))
 
 
+;; Performance of hashing long values, plus loop overhead
+;; (time (hash-range-n 100000000))
+
+(defn hash-range-n [n]
+  (let [n (long n)]
+    (loop [i 0, sum 0]
+      (if (== i n)
+        sum
+        (recur (unchecked-inc i) (unchecked-add sum (long (hash i))))))))
+
+
+(defn total-hash [xs]
+  (loop [sum 0
+         xs xs]
+    (if-let [xs (seq xs)]
+      (recur (unchecked-add sum (long (hash (first xs))))
+             (next xs))
+      sum)))
+
+
+;; Performance testing of hashing many vectors of ints.  No two
+;; vectors being hashed are identical, so hash computation cannot
+;; simply return a cached value with no computation at all.
+
+;; Timing is only done on the hash calculation, after all vector
+;; construction has been completed.
+
+;; I do not know yet whether the hashing is doing incremental
+;; computation based upon previously calculated hashes on vectors that
+;; share structure.  If so, that would come into play to speed up
+;; these timing results.
+
+;; (let [cs (doall (reductions conj [] (range 20000)))]
+;;   (time (total-hash cs)))
+
+;; Same as above, except for sets instead of vectors
+
+;; (let [cs (doall (reductions conj #{} (range 20000)))]
+;;   (time (total-hash cs)))
+
+
+
 (def default-coordinates-args [20 50 100 400])
 
 
