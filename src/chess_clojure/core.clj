@@ -69,6 +69,13 @@ hashing executive summary document as of Oct 31 2013."
   (unchecked-int (sequence-hash-combine s (int -1640531527) element-hash-fn)))
 
 
+(defn engelberg-sequence-hash-combine-2013-11-18
+  "Recommended hash for vectors and sequences from Mark Engelberg
+personal communication on Nov 18 2013."
+  [s element-hash-fn]
+  (unchecked-int (sequence-hash-combine s (int -1640531535) element-hash-fn)))
+
+
 (defn alt-integer-hash [i]
   (cond (<= Integer/MIN_VALUE i Integer/MAX_VALUE) (murmur3-32 [i] 0)
         (<= Long/MIN_VALUE i Long/MAX_VALUE) (murmur3-32
@@ -219,7 +226,24 @@ vector/sequence hash is different."
                                                  obj)))
         (vector? obj) (engelberg-sequence-hash-combine-2013-10-31
                        obj engelberg-hash-2013-10-30)
-        :else (throw (IllegalArgumentException. (format "engelberg-hash-2013-10-30 called with object of class %s" (class obj))))))
+        :else (throw (IllegalArgumentException. (format "engelberg-hash-2013-10-31 called with object of class %s" (class obj))))))
+
+
+(defn engelberg-hash-2013-11-18
+  "Combines all recommendations from Mark Engelberg's Oct 31 2013
+executive summary document, except for those on maps.  Same as
+engelberg-hash-2013-10-30, except the multiplier for the
+vector/sequence hash is different."
+  [obj]
+  (cond (integer? obj) (engelberg-long-hash-munge-2013-10-30 obj)
+        (keyword? obj) (hash obj)
+        (set? obj) (unchecked-int (reduce + (map (fn [x]
+                                                   (engelberg-xor-shift-32-2013-10-30
+                                                    (engelberg-hash-2013-10-30 x)))
+                                                 obj)))
+        (vector? obj) (engelberg-sequence-hash-combine-2013-11-18
+                       obj engelberg-hash-2013-10-30)
+        :else (throw (IllegalArgumentException. (format "engelberg-hash-2013-11-18 called with object of class %s" (class obj))))))
 
 
 (defn print-hash-val-header []
@@ -260,6 +284,7 @@ vector/sequence hash is different."
                                   [engelberg-hash-2013-10-29 "engelberg-hash-2013-10-29"]
                                   [engelberg-hash-2013-10-30 "engelberg-hash-2013-10-30"]
                                   [engelberg-hash-2013-10-31 "engelberg-hash-2013-10-31"]
+                                  [engelberg-hash-2013-11-18 "engelberg-hash-2013-11-18"]
                                   ]]
     (print-hash-stats coll hash-fn hash-fn-name)))
 
