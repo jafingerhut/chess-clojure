@@ -222,10 +222,10 @@ vector/sequence hash is different."
         (keyword? obj) (hash obj)
         (set? obj) (unchecked-int (reduce + (map (fn [x]
                                                    (engelberg-xor-shift-32-2013-10-30
-                                                    (engelberg-hash-2013-10-30 x)))
+                                                    (engelberg-hash-2013-10-31 x)))
                                                  obj)))
         (vector? obj) (engelberg-sequence-hash-combine-2013-10-31
-                       obj engelberg-hash-2013-10-30)
+                       obj engelberg-hash-2013-10-31)
         :else (throw (IllegalArgumentException. (format "engelberg-hash-2013-10-31 called with object of class %s" (class obj))))))
 
 
@@ -239,10 +239,10 @@ vector/sequence hash is different."
         (keyword? obj) (hash obj)
         (set? obj) (unchecked-int (reduce + (map (fn [x]
                                                    (engelberg-xor-shift-32-2013-10-30
-                                                    (engelberg-hash-2013-10-30 x)))
+                                                    (engelberg-hash-2013-11-18 x)))
                                                  obj)))
         (vector? obj) (engelberg-sequence-hash-combine-2013-11-18
-                       obj engelberg-hash-2013-10-30)
+                       obj engelberg-hash-2013-11-18)
         :else (throw (IllegalArgumentException. (format "engelberg-hash-2013-11-18 called with object of class %s" (class obj))))))
 
 
@@ -294,8 +294,8 @@ vector/sequence hash is different."
     ;; For running with Clojure 1.5.1 unmodified
     "1.5.1" {:fn alt-hash-0 :name "alt-hash-0"}
     ;; For running with a version of Clojure with hash modified
-    "1.6.0-master-SNAPSHOT" {:fn engelberg-hash-2013-10-30
-                             :name "engelberg-hash-2013-10-30"}))
+    "1.6.0-master-SNAPSHOT" {:fn engelberg-hash-2013-11-18
+                             :name "engelberg-hash-2013-11-18"}))
 
 (defn check-java-vs-clojure-hash [coll]
   (let [hash-fn (:fn reimplementation-of-clojure-hash)
