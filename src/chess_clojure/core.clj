@@ -293,6 +293,7 @@ vector/sequence hash is different."
   (case (clojure-version)
     ;; For running with Clojure 1.5.1 unmodified
     "1.5.1" {:fn alt-hash-0 :name "alt-hash-0"}
+    "1.6.0-alpha3" {:fn alt-hash-0 :name "alt-hash-0"}
     ;; For running with a version of Clojure with hash modified
     "1.6.0-master-SNAPSHOT" {:fn engelberg-hash-2013-11-18
                              :name "engelberg-hash-2013-11-18"}))
@@ -339,7 +340,7 @@ function cmpf to compare elements of each sequence."
 (def ^:dynamic *set-type* nil)
 ;; Change *show-hash-stats* to false to skip showing hash stats.
 ;; Enabling them slows down the run time of the code.
-(def ^:dynamic *show-hash-stats* true)
+(def ^:dynamic *show-hash-stats* false)
 
 
 (defn empty-solution []
