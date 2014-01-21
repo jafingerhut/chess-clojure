@@ -35,6 +35,10 @@ Back in this chess-clojure directory, edit project.clj to use version
 
     [org.clojure/clojure "1.6.0-master-SNAPSHOT"]
 
+To try the modified version of Clojure 1.6.0 with an implementation of
+the Murmur3 hash function, adapted from Scala 2.10.3, replace the `git
+checkout` line above with `git checkout try-murmurhash3`.
+
 Note that the 6x6 board is the default board size in the function
 chess-clojure.core/do-nqueens.  You can quickly uncomment different
 lines in that function to try out different board sizes, but realize
