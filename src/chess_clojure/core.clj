@@ -1,6 +1,7 @@
 (ns chess-clojure.core
   (:require [clojure.math.numeric-tower :refer [abs]]
             [primitive-math :as p]
+            [clojure.math.combinatorics :as comb]
             [clojure.string :refer [join]]))
 
 
@@ -278,13 +279,13 @@ vector/sequence hash is different."
 
 (defn print-all-hash-stats [coll]
   (doseq [[hash-fn hash-fn-name] [[hash (str "Clojure " (clojure-version) " hash")]
-                                  [alt-hash-0 "alt-hash-0 (should be same as Clojure 1.5.1 hash)"]
-                                  [alt-hash-1 "alt-hash-1"]
-                                  [alt-hash-2 "alt-hash-2"]
-                                  [engelberg-hash-2013-10-29 "engelberg-hash-2013-10-29"]
-                                  [engelberg-hash-2013-10-30 "engelberg-hash-2013-10-30"]
-                                  [engelberg-hash-2013-10-31 "engelberg-hash-2013-10-31"]
-                                  [engelberg-hash-2013-11-18 "engelberg-hash-2013-11-18"]
+                                  ;;[alt-hash-0 "alt-hash-0 (should be same as Clojure 1.5.1 hash)"]
+                                  ;;[alt-hash-1 "alt-hash-1"]
+                                  ;;[alt-hash-2 "alt-hash-2"]
+                                  ;;[engelberg-hash-2013-10-29 "engelberg-hash-2013-10-29"]
+                                  ;;[engelberg-hash-2013-10-30 "engelberg-hash-2013-10-30"]
+                                  ;;[engelberg-hash-2013-10-31 "engelberg-hash-2013-10-31"]
+                                  ;;[engelberg-hash-2013-11-18 "engelberg-hash-2013-11-18"]
                                   ]]
     (print-hash-stats coll hash-fn hash-fn-name)))
 
@@ -299,12 +300,13 @@ vector/sequence hash is different."
                              :name "engelberg-hash-2013-11-18"}))
 
 (defn check-java-vs-clojure-hash [coll]
-  (let [hash-fn (:fn reimplementation-of-clojure-hash)
-        hash-name (:name reimplementation-of-clojure-hash)]
-    (doseq [val coll]
-      (when (not= (hash val) (hash-fn val))
-        (println (format "Found val with hash=0x%08x but %s=0x%08x: %s"
-                         (hash val) hash-name (hash-fn val) val))))))
+;;  (let [hash-fn (:fn reimplementation-of-clojure-hash)
+;;        hash-name (:name reimplementation-of-clojure-hash)]
+;;    (doseq [val coll]
+;;      (when (not= (hash val) (hash-fn val))
+;;        (println (format "Found val with hash=0x%08x but %s=0x%08x: %s"
+;;                         (hash val) hash-name (hash-fn val) val))))))
+  )
 
 
 (defn cmp-seq-lexi
@@ -395,13 +397,36 @@ function cmpf to compare elements of each sequence."
     x))
 
 
-(defn do-coordinates [max-coord-seq]
-  (print-hash-val-header)
-  (doseq [i max-coord-seq]
-    (let [pairs (for [x (range 0 i), y (range 0 i)] [x y])]
-      (println (format "All-pairs in [0 0] thru [%d %d]" (dec i) (dec i)))
+(defn do-ints [min-val max-val]
+  (let [int-vals (range min-val (inc max-val))]
+    (println (format "All ints in range [%d %d]" min-val (inc max-val)))
+    (print-all-hash-stats int-vals)
+    (check-java-vs-clojure-hash int-vals)))
+
+
+(defn do-2-elem-vecs [ranges]
+  (doseq [[min-val max-val] ranges]
+    (let [pairs (for [x (range min-val max-val), y (range min-val max-val)]
+                  [x y])]
+      (println (format "All 2-elem vecs in [%d %d] thru [%d %d]"
+                       min-val min-val
+                       (dec max-val) (dec max-val)))
       (print-all-hash-stats pairs)
       (check-java-vs-clojure-hash pairs))))
+
+
+(defn do-int-sets [max-size]
+  (let [int-sets (map set (comb/subsets (range max-size)))]
+    (println (format "All subsets of ints in range [%d %d]" 0 (dec max-size)))
+    (print-all-hash-stats int-sets)
+    (check-java-vs-clojure-hash int-sets)))
+
+
+(defn do-maps [size]
+  (let [maps (for [x (range 0 size), y (range 0 size)] {x y})]
+    (println (format "All maps from ints in range [%d %d] to ints in that same range" 0 (dec size)))
+    (print-all-hash-stats maps)
+    (check-java-vs-clojure-hash maps)))
 
 
 (defn do-nqueens [set-type]
@@ -462,7 +487,7 @@ function cmpf to compare elements of each sequence."
 
 
 
-(def default-coordinates-args [20 50 100 400])
+(def default-2-elem-vecs-args [20 50 100 400])
 
 
 (defn show-usage [prog-name]
@@ -471,8 +496,9 @@ function cmpf to compare elements of each sequence."
     %s [ help | -h | --help ]
     %s all
     %s nqueens { sorted-set | hash-set }
-    %s coordinates [ maxcoord1 maxcoord2 ... ]  (default %s)
-" prog-name prog-name prog-name prog-name default-coordinates-args)
+    %s 2-elem-vecs [ maxcoord1 maxcoord2 ... ]  (default %s)
+    %s others
+" prog-name prog-name prog-name prog-name default-2-elem-vecs-args prog-name)
     (flush)))
 
 
@@ -487,11 +513,24 @@ function cmpf to compare elements of each sequence."
   (let [[action & args] args]
     (case action
 
-      "coordinates"
-      (let [coordinates-args (if (zero? (count args))
-                               default-coordinates-args
-                               (map #(Long/parseLong %) args))]
-        (do-coordinates coordinates-args))
+      "2-elem-vecs"
+      (let [max-vals (if (zero? (count args))
+                       default-2-elem-vecs-args
+                       (map #(Long/parseLong %) args))
+            ranges (map (fn [m] [0 m]) max-vals)]
+        (print-hash-val-header)
+        (do-2-elem-vecs ranges))
+
+      "others"
+      (let [two-elem-vecs-args (if (zero? (count args))
+                                 default-2-elem-vecs-args
+                                 (map #(Long/parseLong %) args))]
+        (print-hash-val-header)
+        (do-ints -1000000 1000000)
+        (do-2-elem-vecs [[0 1000]])
+        (do-2-elem-vecs [[-500 500]])
+        (do-int-sets 20)
+        (do-maps 1000))
 
       "nqueens"
       (let [set-type (keyword (first args))]
@@ -505,7 +544,7 @@ function cmpf to compare elements of each sequence."
 
       "all"
       (do
-        (do-coordinates default-coordinates-args)
+        (do-2-elem-vecs default-2-elem-vecs-args)
         (println "\nnqueens sorted-set\n")
         (do-nqueens :sorted-set)
         (println "\nnqueens hash-set\n")

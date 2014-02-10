@@ -3,6 +3,7 @@
 		 ;;[org.clojure/clojure "1.5.1"]
 		 [org.clojure/clojure "1.6.0-alpha3"]
 		 ;;[org.clojure/clojure "1.6.0-master-SNAPSHOT"]
+                 [org.clojure/math.combinatorics "0.0.7"]
                  [primitive-math "0.1.3"]
                  [org.clojure/math.numeric-tower "0.0.2"]]
   :main chess-clojure.core
